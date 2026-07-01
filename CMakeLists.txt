@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 
+set(PICO_PIO_USB_PATH "$ENV{PICO_PIO_USB_PATH}" CACHE PATH "Path to Pico-PIO-USB source code")
+
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
-project(tinyusb-vendor-example C CXX ASM)
+project(kkspoofer C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -37,17 +39,19 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/
 )
 
-# Include the various pico libraries we need
+add_subdirectory(${PICO_PIO_USB_PATH} ${CMAKE_CURRENT_BINARY_DIR}/pico_pio_usb)
+
 target_link_libraries(${PROJECT_NAME}
     tinyusb_device
     tinyusb_board
+    tinyusb_host
     pico_multicore
     pico_stdlib
+    pico_pio_usb
+    hardware_clocks
 )
 
-# Redirects serial output to USB
-pico_enable_stdio_usb(${PROJECT_NAME} 0) # Incompatible with using tinyusb manually
+pico_enable_stdio_usb(${PROJECT_NAME} 0)
 pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
-# Creates additional output files
 pico_add_extra_outputs(${PROJECT_NAME})
